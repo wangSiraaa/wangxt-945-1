@@ -1,0 +1,214 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+.sidebar-logo h2 {
+  color: #fff;
+  font-size: 18px;
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.sidebar-logo p {
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.sidebar .ant-menu {
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+}
+
+.sidebar .ant-menu-item {
+  color: rgba(255,255,255,0.7) !important;
+  margin: 2px 8px !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  line-height: 44px !important;
+}
+
+.sidebar .ant-menu-item:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,0.08) !important;
+}
+
+.sidebar .ant-menu-item-selected {
+  color: #fff !important;
+  background: linear-gradient(90deg, #1677ff, #4096ff) !important;
+}
+
+.sidebar .ant-menu-item .anticon {
+  font-size: 16px;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 220px;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.page-header p {
+  color: #8c8c8c;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.stat-card .stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.stat-card .stat-label {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.card-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  margin-bottom: 20px;
+}
+
+.menu-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  height: 100%;
+}
+
+.menu-card:hover {
+  border-color: #1677ff;
+  box-shadow: 0 4px 12px rgba(22,119,255,0.15);
+}
+
+.menu-card.selected {
+  border-color: #1677ff;
+  background: #e6f4ff;
+}
+
+.menu-card .menu-name {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #1a1a2e;
+}
+
+.menu-card .menu-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f5222d;
+}
+
+.menu-card .menu-category {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.menu-card .menu-stock {
+  font-size: 12px;
+  color: #52c41a;
+  margin-top: 4px;
+}
+
+.menu-card .menu-stock.low {
+  color: #faad14;
+}
+
+.menu-card .menu-stock.out {
+  color: #f5222d;
+}
+
+.order-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.order-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.status-tag {
+  font-weight: 500;
+}
+
+.budget-bar {
+  margin-top: 8px;
+}
+
+.settlement-detail {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+}
