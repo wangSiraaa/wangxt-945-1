@@ -1697,41 +1697,90 @@ app.get('/api/finance-ledger', (req, res) => {
 
 app.post('/api/finance-ledger/recalculate', (req, res) => {
   const db = readDB();
-  const { department_id, start_date, end_date } = req.body;
-  if (!department_id || !start_date || !end_date) return res.status(400).json({ error: '请提供部门ID和日期范围' });
+  const { month, department_id } = req.body;
+
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+    return res.status(400).json({ error: '请提供有效的月份参数，格式为 YYYY-MM' });
+  }
+
+  const y = parseInt(month.substring(0, 4), 10);
+  const m = parseInt(month.substring(5, 7), 10);
+  const start_date = `${month}-01`;
+  const endDateObj = new Date(y, m, 0);
+  const end_date = `${month}-${String(endDateObj.getDate()).padStart(2, '0')}`;
+
+  const deptIds = department_id
+    ? [parseInt(department_id, 10)]
+    : db.departments.map(d => d.id);
 
   const orders = db.orders.filter(o =>
-    o.department_id === department_id &&
+    deptIds.includes(o.department_id) &&
     o.menu_date >= start_date &&
     o.menu_date <= end_date
   );
 
   const oldEntries = db.finance_ledger_entries.filter(e =>
-    e.department_id === department_id &&
+    deptIds.includes(e.department_id) &&
     e.menu_date >= start_date &&
     e.menu_date <= end_date
   );
 
   db.finance_ledger_entries = db.finance_ledger_entries.filter(e =>
-    !(e.department_id === department_id && e.menu_date >= start_date && e.menu_date <= end_date)
+    !(deptIds.includes(e.department_id) && e.menu_date >= start_date && e.menu_date <= end_date)
   );
 
-  for (const order of orders) {
-    if (order.is_cancelled === 0 && order.status === 'confirmed') {
-      writeFinanceLedgerForOrder(db, order, 'create', null);
-    } else if (order.is_cancelled === 1) {
-      writeFinanceLedgerForOrder(db, order, 'cancel', null);
+  const logMap = {};
+  for (const log of db.order_change_logs) {
+    if (!logMap[log.order_id]) logMap[log.order_id] = [];
+    logMap[log.order_id].push(log);
+  }
+  for (const oid of Object.keys(logMap)) {
+    logMap[oid].sort((a, b) => a.id - b.id);
+  }
+
+  const logs = db.order_change_logs.filter(l => {
+    const o = db.orders.find(o => o.id === l.order_id);
+    if (!o) return false;
+    return deptIds.includes(o.department_id) && o.menu_date >= start_date && o.menu_date <= end_date;
+  }).sort((a, b) => a.id - b.id);
+
+  for (const log of logs) {
+    const order = orders.find(o => o.id === log.order_id);
+    if (!order) continue;
+    const t = log.change_type;
+
+    if (t === 'create' || t === 'approve' || t === 'supplement') {
+      writeFinanceLedgerForOrder(db, order, 'create', log.id);
+    } else if (t === 'cancel') {
+      writeFinanceLedgerForOrder(db, order, 'cancel', log.id);
+    } else if (t === 'substitute' && log.amount_diff && log.amount_diff !== 0) {
+      const adjustedOrder = { ...order, amount_diff: log.amount_diff };
+      writeFinanceLedgerForOrder(db, adjustedOrder, 'substitute', log.id);
     }
   }
 
   writeDB(db);
 
+  const newEntries = db.finance_ledger_entries.filter(e =>
+    deptIds.includes(e.department_id) && e.menu_date >= start_date && e.menu_date <= end_date
+  );
+
+  const typeTotals = {};
+  for (const e of newEntries) {
+    typeTotals[e.entry_type] = (typeTotals[e.entry_type] || 0) + e.amount;
+  }
+
   res.json({
+    month,
+    start_date,
+    end_date,
+    department_count: deptIds.length,
     recalculated_orders: orders.length,
+    processed_change_logs: logs.length,
     removed_entries: oldEntries.length,
-    new_entries: db.finance_ledger_entries.filter(e =>
-      e.department_id === department_id && e.menu_date >= start_date && e.menu_date <= end_date
-    ).length
+    new_entries: newEntries.length,
+    type_totals: typeTotals,
+    dept_ids: deptIds,
   });
 });
 
