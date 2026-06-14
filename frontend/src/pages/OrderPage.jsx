@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   DatePicker, Segmented, Select, Card, Row, Col, Button, Tag, Spin,
   message, Empty, Modal, Descriptions, List, Badge, Alert, Tooltip,
-  Checkbox, Switch, Form, Input, InputNumber, Divider,
+  Checkbox, Switch, Form, Input, InputNumber, Divider, Space,
 } from 'antd';
 import {
   ShoppingCartOutlined, DeleteOutlined, ExclamationCircleOutlined,
@@ -28,7 +28,7 @@ const mealTypeMap = {
 export default function OrderPage() {
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [mealType, setMealType] = useState('lunch');
-  const [canteenId, setCanteenId] = useState();
+  const [canteenId, setCanteenId] = useState(null);
   const [canteens, setCanteens] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -56,11 +56,21 @@ export default function OrderPage() {
   }, []);
 
   useEffect(() => {
-    if (date && mealType) {
+    if (date && mealType && canteenId) {
+      setSelectedItems([]);
+      setAllergenWarning(null);
       loadDailyMenus();
       loadOrders();
     }
-  }, [date, mealType, selectedEmp, canteenId]);
+  }, [date, mealType, canteenId]);
+
+  useEffect(() => {
+    if (selectedEmp && canteenId) {
+      loadOrders();
+    } else {
+      setOrders([]);
+    }
+  }, [selectedEmp]);
 
   useEffect(() => {
     checkAllergens();
@@ -87,10 +97,10 @@ export default function OrderPage() {
   };
 
   const loadDailyMenus = async () => {
+    if (!canteenId) return;
     try {
       setLoading(true);
-      const params = { date, meal_type: mealType };
-      if (canteenId) params.canteen_id = canteenId;
+      const params = { date, meal_type: mealType, canteen_id: canteenId };
       const [dailyData, menuData] = await Promise.all([
         menuApi.dailyList(params),
         menuApi.list(),
@@ -105,7 +115,7 @@ export default function OrderPage() {
   };
 
   const loadOrders = async () => {
-    if (!selectedEmp) {
+    if (!selectedEmp || !canteenId) {
       setOrders([]);
       return;
     }
@@ -114,6 +124,7 @@ export default function OrderPage() {
         employee_id: selectedEmp,
         menu_date: date,
         meal_type: mealType,
+        canteen_id: canteenId,
       });
       setOrders(data);
     } catch (err) {
@@ -150,10 +161,15 @@ export default function OrderPage() {
   };
 
   const toggleItem = (dm) => {
+    const itemCanteenId = dm.canteen_id || canteenId;
+    if (itemCanteenId !== canteenId) {
+      message.warning('该菜品不属于当前所选食堂');
+      return;
+    }
     setSelectedItems((prev) => {
       const exists = prev.find((i) => i.daily_menu_id === dm.id);
       if (exists) return prev.filter((i) => i.daily_menu_id !== dm.id);
-      return [...prev, { daily_menu_id: dm.id, quantity: 1, menu_id: dm.menu_id, canteen_id: canteenId }];
+      return [...prev, { daily_menu_id: dm.id, quantity: 1, menu_id: dm.menu_id, canteen_id: itemCanteenId }];
     });
   };
 
@@ -180,6 +196,13 @@ export default function OrderPage() {
     if (!selectedEmp) return message.warning('请先选择员工');
     if (selectedItems.length === 0) return message.warning('请选择餐品');
     if (isProxy && proxyEmployees.length === 0) return message.warning('请选择代订员工');
+    if (!canteenId) return message.warning('请选择食堂');
+
+    const wrongCanteenItems = selectedItems.filter(i => i.canteen_id !== canteenId);
+    if (wrongCanteenItems.length > 0) {
+      setSelectedItems(prev => prev.filter(i => i.canteen_id === canteenId));
+      return message.warning('已自动移除不属于当前食堂的餐品，请重新确认');
+    }
 
     setSubmitting(true);
     try {
@@ -273,6 +296,7 @@ export default function OrderPage() {
           employee_id: originalOrder.employee_id,
           menu_date: originalOrder.menu_date,
           meal_type: originalOrder.meal_type,
+          canteen_id: originalOrder.canteen_id,
           items: [{ daily_menu_id: values.daily_menu_id, quantity: values.quantity }],
           reason: values.reason,
           is_extra: false,
@@ -388,8 +412,11 @@ export default function OrderPage() {
                 style={{ width: '100%' }}
                 placeholder="选择食堂"
                 value={canteenId}
-                onChange={setCanteenId}
-                allowClear
+                onChange={(v) => {
+                  setCanteenId(v);
+                  setSelectedItems([]);
+                  setAllergenWarning(null);
+                }}
               >
                 {canteens.map((c) => (
                   <Option key={c.id} value={c.id}>
@@ -495,6 +522,11 @@ export default function OrderPage() {
           <Col xs={24} lg={14}>
             <h4 style={{ marginBottom: 12 }}>
               选择餐品
+              {canteenId && (
+                <Tag color="blue" style={{ marginLeft: 8 }}>
+                  {canteens.find((c) => c.id === canteenId)?.name || '未知食堂'}
+                </Tag>
+              )}
               {selectedEmployee?.allergens?.length > 0 && (
                 <Tooltip title={`您的过敏原: ${selectedEmployee.allergens.join('、')}`}>
                   <Tag color="warning" style={{ marginLeft: 8 }}>
@@ -505,8 +537,10 @@ export default function OrderPage() {
             </h4>
             {loading ? (
               <Spin style={{ display: 'block', margin: '40px auto' }} />
+            ) : !canteenId ? (
+              <Empty description="请先选择食堂" />
             ) : dailyMenus.length === 0 ? (
-              <Empty description="该日期此餐别暂无菜品，请更换食堂或日期" />
+              <Empty description={`该日期此餐别在${canteens.find((c) => c.id === canteenId)?.name || '当前食堂'}暂无菜品，请更换食堂或日期`} />
             ) : (
               <Row gutter={[12, 12]}>
                 {dailyMenus.map((dm) => {

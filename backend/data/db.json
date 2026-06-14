@@ -78,7 +78,10 @@
       "name": "张三",
       "employee_no": "E001",
       "department_id": 1,
-      "allergens": ["花生", "海鲜"],
+      "allergens": [
+        "花生",
+        "海鲜"
+      ],
       "is_proxy": 0,
       "created_at": "2026-06-11T18:32:15.282Z"
     },
@@ -96,7 +99,9 @@
       "name": "王五",
       "employee_no": "E003",
       "department_id": 1,
-      "allergens": ["鸡蛋"],
+      "allergens": [
+        "鸡蛋"
+      ],
       "is_proxy": 0,
       "created_at": "2026-06-11T18:32:15.282Z"
     },
@@ -114,7 +119,9 @@
       "name": "钱七",
       "employee_no": "E005",
       "department_id": 2,
-      "allergens": ["牛奶"],
+      "allergens": [
+        "牛奶"
+      ],
       "is_proxy": 0,
       "created_at": "2026-06-11T18:32:15.282Z"
     },
@@ -202,7 +209,9 @@
       "price": 25,
       "category": "荤菜套餐",
       "description": "宫保鸡丁+青菜+米饭+汤",
-      "allergens": ["花生"],
+      "allergens": [
+        "花生"
+      ],
       "substitute_rule": "鱼香肉丝套餐",
       "is_active": 1,
       "created_at": "2026-06-11T18:32:15.284Z"
@@ -250,7 +259,9 @@
       "price": 18,
       "category": "面食",
       "description": "西红柿鸡蛋面一碗",
-      "allergens": ["鸡蛋"],
+      "allergens": [
+        "鸡蛋"
+      ],
       "substitute_rule": "酸辣粉",
       "is_active": 1,
       "created_at": "2026-06-11T18:32:15.284Z"
@@ -274,7 +285,9 @@
       "price": 15,
       "category": "小吃",
       "description": "重庆酸辣粉一份",
-      "allergens": ["花生"],
+      "allergens": [
+        "花生"
+      ],
       "substitute_rule": "皮蛋瘦肉粥套餐",
       "is_active": 1,
       "created_at": "2026-06-11T18:32:15.284Z"
@@ -298,7 +311,9 @@
       "price": 35,
       "category": "荤菜套餐",
       "description": "清蒸鲈鱼+青菜+米饭+汤",
-      "allergens": ["海鲜"],
+      "allergens": [
+        "海鲜"
+      ],
       "substitute_rule": "红烧肉套餐",
       "is_active": 1,
       "created_at": "2026-06-11T18:32:15.284Z"
@@ -425,7 +440,7 @@
       "menu_date": "2026-06-13",
       "menu_id": 1,
       "meal_type": "lunch",
-      "stock": 100,
+      "stock": 98,
       "predict_qty": 85,
       "created_at": "2026-06-11T18:32:15.289Z"
     },
@@ -505,7 +520,7 @@
       "menu_date": "2026-06-12",
       "menu_id": 7,
       "meal_type": "lunch",
-      "stock": 60,
+      "stock": 59,
       "predict_qty": 50,
       "created_at": "2026-06-11T18:32:15.292Z"
     },
@@ -515,7 +530,7 @@
       "menu_date": "2026-06-12",
       "menu_id": 8,
       "meal_type": "lunch",
-      "stock": 60,
+      "stock": 58,
       "predict_qty": 45,
       "created_at": "2026-06-11T18:32:15.292Z"
     },
@@ -538,6 +553,566 @@
       "stock": 50,
       "predict_qty": 40,
       "created_at": "2026-06-11T18:32:15.292Z"
+    },
+    {
+      "id": 22,
+      "canteen_id": 1,
+      "menu_date": "2026-06-12",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 75,
+      "predict_qty": 60,
+      "created_at": "2026-06-13T13:35:57.851Z"
+    },
+    {
+      "id": 23,
+      "canteen_id": 1,
+      "menu_date": "2026-06-12",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 80,
+      "predict_qty": 65,
+      "created_at": "2026-06-13T13:35:57.858Z"
+    },
+    {
+      "id": 24,
+      "canteen_id": 2,
+      "menu_date": "2026-06-12",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 45,
+      "predict_qty": 35,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 25,
+      "canteen_id": 2,
+      "menu_date": "2026-06-12",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 50,
+      "predict_qty": 40,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 26,
+      "canteen_id": 2,
+      "menu_date": "2026-06-12",
+      "menu_id": 6,
+      "meal_type": "dinner",
+      "stock": 45,
+      "predict_qty": 35,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 27,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 35,
+      "predict_qty": 25,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 28,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 40,
+      "predict_qty": 30,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 29,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 2,
+      "meal_type": "lunch",
+      "stock": 50,
+      "predict_qty": 38,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 30,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 3,
+      "meal_type": "lunch",
+      "stock": 55,
+      "predict_qty": 43,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 31,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 5,
+      "meal_type": "lunch",
+      "stock": 60,
+      "predict_qty": 48,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 32,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 9,
+      "meal_type": "lunch",
+      "stock": 65,
+      "predict_qty": 53,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 33,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 4,
+      "meal_type": "dinner",
+      "stock": 40,
+      "predict_qty": 30,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 34,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 6,
+      "meal_type": "dinner",
+      "stock": 45,
+      "predict_qty": 35,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 35,
+      "canteen_id": 3,
+      "menu_date": "2026-06-12",
+      "menu_id": 7,
+      "meal_type": "dinner",
+      "stock": 50,
+      "predict_qty": 40,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 36,
+      "canteen_id": 1,
+      "menu_date": "2026-06-13",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 75,
+      "predict_qty": 60,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 37,
+      "canteen_id": 1,
+      "menu_date": "2026-06-13",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 80,
+      "predict_qty": 65,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 38,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 45,
+      "predict_qty": 35,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 39,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 50,
+      "predict_qty": 40,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 40,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "menu_id": 7,
+      "meal_type": "lunch",
+      "stock": 54,
+      "predict_qty": 45,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 41,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "menu_id": 8,
+      "meal_type": "lunch",
+      "stock": 60,
+      "predict_qty": 50,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 42,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "menu_id": 9,
+      "meal_type": "lunch",
+      "stock": 65,
+      "predict_qty": 55,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 43,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "menu_id": 6,
+      "meal_type": "dinner",
+      "stock": 45,
+      "predict_qty": 35,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 44,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "menu_id": 10,
+      "meal_type": "dinner",
+      "stock": 50,
+      "predict_qty": 40,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 45,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 35,
+      "predict_qty": 25,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 46,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 40,
+      "predict_qty": 30,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 47,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 2,
+      "meal_type": "lunch",
+      "stock": 50,
+      "predict_qty": 38,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 48,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 3,
+      "meal_type": "lunch",
+      "stock": 55,
+      "predict_qty": 43,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 49,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 5,
+      "meal_type": "lunch",
+      "stock": 60,
+      "predict_qty": 48,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 50,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 9,
+      "meal_type": "lunch",
+      "stock": 65,
+      "predict_qty": 53,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 51,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 4,
+      "meal_type": "dinner",
+      "stock": 40,
+      "predict_qty": 30,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 52,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 6,
+      "meal_type": "dinner",
+      "stock": 45,
+      "predict_qty": 35,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 53,
+      "canteen_id": 3,
+      "menu_date": "2026-06-13",
+      "menu_id": 7,
+      "meal_type": "dinner",
+      "stock": 50,
+      "predict_qty": 40,
+      "created_at": "2026-06-13T13:35:57.859Z"
+    },
+    {
+      "id": 54,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 80,
+      "predict_qty": 65,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 55,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 85,
+      "predict_qty": 70,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 56,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 1,
+      "meal_type": "lunch",
+      "stock": 100,
+      "predict_qty": 90,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 57,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 2,
+      "meal_type": "lunch",
+      "stock": 100,
+      "predict_qty": 85,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 58,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 3,
+      "meal_type": "lunch",
+      "stock": 100,
+      "predict_qty": 80,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 59,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 4,
+      "meal_type": "lunch",
+      "stock": 95,
+      "predict_qty": 70,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 60,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 5,
+      "meal_type": "dinner",
+      "stock": 80,
+      "predict_qty": 68,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 61,
+      "canteen_id": 1,
+      "menu_date": "2026-06-14",
+      "menu_id": 6,
+      "meal_type": "dinner",
+      "stock": 80,
+      "predict_qty": 60,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 62,
+      "canteen_id": 2,
+      "menu_date": "2026-06-14",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 48,
+      "predict_qty": 38,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 63,
+      "canteen_id": 2,
+      "menu_date": "2026-06-14",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 52,
+      "predict_qty": 42,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 64,
+      "canteen_id": 2,
+      "menu_date": "2026-06-14",
+      "menu_id": 7,
+      "meal_type": "lunch",
+      "stock": 58,
+      "predict_qty": 48,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 65,
+      "canteen_id": 2,
+      "menu_date": "2026-06-14",
+      "menu_id": 8,
+      "meal_type": "lunch",
+      "stock": 62,
+      "predict_qty": 52,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 66,
+      "canteen_id": 2,
+      "menu_date": "2026-06-14",
+      "menu_id": 9,
+      "meal_type": "lunch",
+      "stock": 66,
+      "predict_qty": 56,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 67,
+      "canteen_id": 2,
+      "menu_date": "2026-06-14",
+      "menu_id": 10,
+      "meal_type": "dinner",
+      "stock": 50,
+      "predict_qty": 42,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 68,
+      "canteen_id": 2,
+      "menu_date": "2026-06-14",
+      "menu_id": 6,
+      "meal_type": "dinner",
+      "stock": 48,
+      "predict_qty": 38,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 69,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 11,
+      "meal_type": "breakfast",
+      "stock": 38,
+      "predict_qty": 28,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 70,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 12,
+      "meal_type": "breakfast",
+      "stock": 42,
+      "predict_qty": 32,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 71,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 2,
+      "meal_type": "lunch",
+      "stock": 52,
+      "predict_qty": 40,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 72,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 3,
+      "meal_type": "lunch",
+      "stock": 56,
+      "predict_qty": 45,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 73,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 5,
+      "meal_type": "lunch",
+      "stock": 60,
+      "predict_qty": 50,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 74,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 9,
+      "meal_type": "lunch",
+      "stock": 65,
+      "predict_qty": 55,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 75,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 4,
+      "meal_type": "dinner",
+      "stock": 42,
+      "predict_qty": 32,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 76,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 6,
+      "meal_type": "dinner",
+      "stock": 46,
+      "predict_qty": 36,
+      "created_at": "2026-06-14T06:00:00.000Z"
+    },
+    {
+      "id": 77,
+      "canteen_id": 3,
+      "menu_date": "2026-06-14",
+      "menu_id": 7,
+      "meal_type": "dinner",
+      "stock": 50,
+      "predict_qty": 40,
+      "created_at": "2026-06-14T06:00:00.000Z"
     }
   ],
   "orders": [
@@ -651,7 +1226,9 @@
       "reject_reason": null,
       "is_extra": 0,
       "is_supplement": 0,
-      "share_dept_ids": [1],
+      "share_dept_ids": [
+        1
+      ],
       "proxy_employee_id": null,
       "verified": 1,
       "verified_at": "2026-06-12T04:40:00.000Z",
@@ -1020,6 +1597,116 @@
       "remark": null,
       "created_at": "2026-06-12T01:20:42.113Z",
       "updated_at": "2026-06-12T01:20:42.113Z"
+    },
+    {
+      "id": 17,
+      "order_no": "ORD202606132113375707",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 2,
+      "menu_date": "2026-06-12",
+      "meal_type": "lunch",
+      "total_amount": 15,
+      "personal_pay": 4.5,
+      "subsidy_amount": 10.5,
+      "status": "confirmed",
+      "cancel_fee": 0,
+      "is_cancelled": 0,
+      "is_extra": 0,
+      "is_supplement": 1,
+      "cancelled_at": null,
+      "approved_by": null,
+      "approved_at": null,
+      "reject_reason": null,
+      "verified": 0,
+      "created_at": "2026-06-13T13:13:37.026Z",
+      "updated_at": "2026-06-13T13:13:37.026Z",
+      "remark": "测试补改单"
+    },
+    {
+      "id": 18,
+      "order_no": "ORD202606132119456801",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 2,
+      "menu_date": "2026-06-12",
+      "meal_type": "lunch",
+      "total_amount": 15,
+      "personal_pay": 4.5,
+      "subsidy_amount": 10.5,
+      "status": "confirmed",
+      "cancel_fee": 0,
+      "is_cancelled": 0,
+      "is_extra": 0,
+      "is_supplement": 1,
+      "cancelled_at": null,
+      "approved_by": null,
+      "approved_at": null,
+      "reject_reason": null,
+      "verified": 0,
+      "created_at": "2026-06-13T13:19:45.632Z",
+      "updated_at": "2026-06-13T13:19:45.632Z",
+      "remark": "补改单回归测试"
+    },
+    {
+      "id": 19,
+      "order_no": "ORD202606140951212647",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 2,
+      "menu_date": "2026-06-12",
+      "meal_type": "lunch",
+      "total_amount": 25,
+      "status": "confirmed",
+      "cancel_fee": 0,
+      "is_cancelled": 0,
+      "is_extra": 1,
+      "cancelled_at": null,
+      "approved_by": null,
+      "approved_at": null,
+      "reject_reason": null,
+      "created_at": "2026-06-14T01:51:21.533Z",
+      "updated_at": "2026-06-14T01:51:21.533Z"
+    },
+    {
+      "id": 20,
+      "order_no": "ORD202606141244330724",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 2,
+      "menu_date": "2026-06-13",
+      "meal_type": "lunch",
+      "total_amount": 25,
+      "status": "confirmed",
+      "cancel_fee": 0,
+      "is_cancelled": 0,
+      "is_extra": 1,
+      "cancelled_at": null,
+      "approved_by": null,
+      "approved_at": null,
+      "reject_reason": null,
+      "created_at": "2026-06-14T04:44:33.677Z",
+      "updated_at": "2026-06-14T04:44:33.677Z"
+    },
+    {
+      "id": 21,
+      "order_no": "ORD202606141244335635",
+      "employee_id": 2,
+      "department_id": 1,
+      "canteen_id": 1,
+      "menu_date": "2026-06-13",
+      "meal_type": "lunch",
+      "total_amount": 56,
+      "status": "confirmed",
+      "cancel_fee": 0,
+      "is_cancelled": 0,
+      "is_extra": 1,
+      "cancelled_at": null,
+      "approved_by": null,
+      "approved_at": null,
+      "reject_reason": null,
+      "created_at": "2026-06-14T04:44:33.703Z",
+      "updated_at": "2026-06-14T04:44:33.703Z"
     }
   ],
   "order_items": [
@@ -1282,6 +1969,64 @@
       "is_substituted": 0,
       "original_menu_id": null,
       "created_at": "2026-06-12T01:20:42.113Z"
+    },
+    {
+      "id": 21,
+      "order_id": 17,
+      "daily_menu_id": 19,
+      "menu_id": 8,
+      "menu_name": "酸辣粉",
+      "price": 15,
+      "quantity": 1,
+      "subtotal": 15,
+      "created_at": "2026-06-13T13:13:37.026Z"
+    },
+    {
+      "id": 22,
+      "order_id": 18,
+      "daily_menu_id": 19,
+      "menu_id": 8,
+      "menu_name": "酸辣粉",
+      "price": 15,
+      "quantity": 1,
+      "subtotal": 15,
+      "created_at": "2026-06-13T13:19:45.632Z"
+    },
+    {
+      "id": 23,
+      "order_id": 19,
+      "daily_menu_id": 18,
+      "menu_id": 7,
+      "canteen_id": 2,
+      "menu_name": "牛肉面",
+      "price": 25,
+      "quantity": 1,
+      "subtotal": 25,
+      "created_at": "2026-06-14T01:51:21.533Z"
+    },
+    {
+      "id": 24,
+      "order_id": 20,
+      "daily_menu_id": 40,
+      "menu_id": 7,
+      "canteen_id": 2,
+      "menu_name": "牛肉面",
+      "price": 25,
+      "quantity": 1,
+      "subtotal": 25,
+      "created_at": "2026-06-14T04:44:33.677Z"
+    },
+    {
+      "id": 25,
+      "order_id": 21,
+      "daily_menu_id": 10,
+      "menu_id": 1,
+      "canteen_id": 1,
+      "menu_name": "红烧排骨套餐",
+      "price": 28,
+      "quantity": 2,
+      "subtotal": 56,
+      "created_at": "2026-06-14T04:44:33.703Z"
     }
   ],
   "department_budgets": [
@@ -1291,12 +2036,12 @@
       "budget_month": "2026-06",
       "meal_type": "lunch",
       "total_budget": 30000,
-      "used_amount": 104,
+      "used_amount": 240,
       "reserved_amount": 0,
       "personal_used": 31.2,
       "subsidy_used": 72.8,
       "created_at": "2026-06-11T18:32:15.293Z",
-      "updated_at": "2026-06-11T18:32:15.341Z"
+      "updated_at": "2026-06-14T04:44:33.703Z"
     },
     {
       "id": 2,
@@ -1685,6 +2430,28 @@
       "order_id": 15,
       "remark": "订单扣减",
       "created_at": "2026-06-12T01:17:55.432Z"
+    },
+    {
+      "id": 6,
+      "menu_id": 8,
+      "menu_name": "酸辣粉",
+      "daily_menu_id": 19,
+      "change_type": "out",
+      "quantity": 1,
+      "reason": "补改单",
+      "ref_order_no": "ORD202606132113375707",
+      "created_at": "2026-06-13T13:13:37.026Z"
+    },
+    {
+      "id": 7,
+      "menu_id": 8,
+      "menu_name": "酸辣粉",
+      "daily_menu_id": 19,
+      "change_type": "out",
+      "quantity": 1,
+      "reason": "补改单",
+      "ref_order_no": "ORD202606132119456801",
+      "created_at": "2026-06-13T13:19:45.632Z"
     }
   ],
   "verification_records": [
@@ -1733,7 +2500,30 @@
       "remark": "正常取餐"
     }
   ],
-  "supplement_orders": [],
+  "supplement_orders": [
+    {
+      "id": 1,
+      "original_order_id": null,
+      "new_order_id": 17,
+      "new_order_no": "ORD202606132113375707",
+      "reason": "测试补改单",
+      "is_extra": 0,
+      "diff_amount": 15,
+      "created_by": 1,
+      "created_at": "2026-06-13T13:13:37.026Z"
+    },
+    {
+      "id": 2,
+      "original_order_id": null,
+      "new_order_id": 18,
+      "new_order_no": "ORD202606132119456801",
+      "reason": "补改单回归测试",
+      "is_extra": 0,
+      "diff_amount": 15,
+      "created_by": 1,
+      "created_at": "2026-06-13T13:19:45.632Z"
+    }
+  ],
   "settings": [
     {
       "id": 1,

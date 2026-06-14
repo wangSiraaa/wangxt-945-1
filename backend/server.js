@@ -42,10 +42,21 @@ function getSetting(key, defaultValue = null) {
   return setting ? setting.value : defaultValue;
 }
 
-function isBeforeCutoff(menuDate, mealType) {
+function isBeforeCutoff(menuDate, mealType, isExtra = false) {
+  if (isExtra) return true;
   const now = dayjs();
-  const cutoffKey = mealType === 'lunch' ? 'cutoff_time_lunch' : 'cutoff_time_dinner';
-  const cutoffTime = getSetting(cutoffKey, mealType === 'lunch' ? '10:00' : '16:00');
+  let cutoffKey, defaultCutoff;
+  if (mealType === 'breakfast') {
+    cutoffKey = 'cutoff_time_breakfast';
+    defaultCutoff = '07:30';
+  } else if (mealType === 'lunch') {
+    cutoffKey = 'cutoff_time_lunch';
+    defaultCutoff = '10:00';
+  } else {
+    cutoffKey = 'cutoff_time_dinner';
+    defaultCutoff = '16:00';
+  }
+  const cutoffTime = getSetting(cutoffKey, defaultCutoff);
   const [cutoffHour, cutoffMinute] = cutoffTime.split(':').map(Number);
   
   const cutoffDateTime = dayjs(menuDate).hour(cutoffHour).minute(cutoffMinute).second(0);
@@ -63,8 +74,18 @@ function getCancelFeePercentage() {
 function isWithinFreeCancelPeriod(menuDate, mealType) {
   const now = dayjs();
   const deadlineMinutes = getCancelFeeDeadlineMinutes();
-  const cutoffKey = mealType === 'lunch' ? 'cutoff_time_lunch' : 'cutoff_time_dinner';
-  const cutoffTime = getSetting(cutoffKey, mealType === 'lunch' ? '10:00' : '16:00');
+  let cutoffKey, defaultCutoff;
+  if (mealType === 'breakfast') {
+    cutoffKey = 'cutoff_time_breakfast';
+    defaultCutoff = '07:30';
+  } else if (mealType === 'lunch') {
+    cutoffKey = 'cutoff_time_lunch';
+    defaultCutoff = '10:00';
+  } else {
+    cutoffKey = 'cutoff_time_dinner';
+    defaultCutoff = '16:00';
+  }
+  const cutoffTime = getSetting(cutoffKey, defaultCutoff);
   const [cutoffHour, cutoffMinute] = cutoffTime.split(':').map(Number);
   
   const cutoffDateTime = dayjs(menuDate).hour(cutoffHour).minute(cutoffMinute).second(0);
@@ -130,7 +151,7 @@ app.get('/api/menus', (req, res) => {
 
 app.get('/api/daily-menus', (req, res) => {
   const db = readDB();
-  const { date, meal_type } = req.query;
+  const { date, meal_type, canteen_id } = req.query;
   let dailyMenus = db.daily_menus;
   
   if (date) {
@@ -138,6 +159,10 @@ app.get('/api/daily-menus', (req, res) => {
   }
   if (meal_type) {
     dailyMenus = dailyMenus.filter(dm => dm.meal_type === meal_type);
+  }
+  if (canteen_id) {
+    const cid = parseInt(canteen_id);
+    dailyMenus = dailyMenus.filter(dm => dm.canteen_id === cid);
   }
   
   const result = dailyMenus.map(dm => {
@@ -153,7 +178,7 @@ app.get('/api/daily-menus', (req, res) => {
 
 app.get('/api/orders', (req, res) => {
   const db = readDB();
-  const { employee_id, department_id, menu_date, status, meal_type } = req.query;
+  const { employee_id, department_id, menu_date, status, meal_type, canteen_id } = req.query;
   let orders = db.orders;
   
   if (employee_id) {
@@ -170,6 +195,10 @@ app.get('/api/orders', (req, res) => {
   }
   if (meal_type) {
     orders = orders.filter(o => o.meal_type === meal_type);
+  }
+  if (canteen_id) {
+    const cid = parseInt(canteen_id);
+    orders = orders.filter(o => o.canteen_id === cid);
   }
   
   orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -199,6 +228,7 @@ app.get('/api/orders/:id', (req, res) => {
   
   const employee = db.employees.find(e => e.id === order.employee_id);
   const department = db.departments.find(d => d.id === order.department_id);
+  const canteen = db.canteens.find(c => c.id === order.canteen_id);
   const items = db.order_items.filter(i => i.order_id === order.id);
   
   res.json({
@@ -206,26 +236,34 @@ app.get('/api/orders/:id', (req, res) => {
     employee_name: employee ? employee.name : '',
     employee_no: employee ? employee.employee_no : '',
     department_name: department ? department.name : '',
+    canteen_name: canteen ? canteen.name : '',
     items
   });
 });
 
 app.post('/api/orders', (req, res) => {
   const db = readDB();
-  const { employee_id, menu_date, meal_type, items } = req.body;
+  const { employee_id, menu_date, meal_type, items, canteen_id, is_extra } = req.body;
   
   const employee = db.employees.find(e => e.id === employee_id);
   if (!employee) {
     return res.status(400).json({ error: '员工不存在' });
   }
-  
-  if (!isBeforeCutoff(menu_date, meal_type)) {
-    return res.status(400).json({ error: '已过截单时间，无法订餐' });
+
+  const canteenId = parseInt(canteen_id);
+  if (!canteenId) {
+    return res.status(400).json({ error: '请选择食堂' });
+  }
+  const canteen = db.canteens.find(c => c.id === canteenId);
+  if (!canteen) {
+    return res.status(400).json({ error: '食堂不存在' });
   }
   
   if (!items || items.length === 0) {
     return res.status(400).json({ error: '请选择餐品' });
   }
+  
+  const isExtra = is_extra === 1 || is_extra === true;
   
   let totalAmount = 0;
   const orderItems = [];
@@ -235,20 +273,31 @@ app.post('/api/orders', (req, res) => {
     if (!dailyMenu) {
       return res.status(400).json({ error: '餐品不存在' });
     }
-    if (dailyMenu.stock < item.quantity) {
-      return res.status(400).json({ error: `${dailyMenu.menu_name}库存不足` });
-    }
     const menu = db.menus.find(m => m.id === dailyMenu.menu_id);
+    if (!menu) {
+      return res.status(400).json({ error: '餐品数据异常' });
+    }
+    if (dailyMenu.canteen_id !== canteenId) {
+      return res.status(400).json({ error: `${menu.name}不属于当前所选食堂` });
+    }
+    if (dailyMenu.stock < item.quantity) {
+      return res.status(400).json({ error: `${menu.name}库存不足` });
+    }
     const subtotal = menu.price * item.quantity;
     totalAmount += subtotal;
     orderItems.push({
       daily_menu_id: dailyMenu.id,
       menu_id: dailyMenu.menu_id,
+      canteen_id: canteenId,
       menu_name: menu.name,
       price: menu.price,
       quantity: item.quantity,
       subtotal
     });
+  }
+  
+  if (!isBeforeCutoff(menu_date, meal_type, isExtra)) {
+    return res.status(400).json({ error: '已过截单时间，无法订餐' });
   }
   
   const budgetCheck = checkBudgetAvailable(employee.department_id, menu_date, totalAmount);
@@ -263,12 +312,14 @@ app.post('/api/orders', (req, res) => {
     order_no: orderNo,
     employee_id,
     department_id: employee.department_id,
+    canteen_id: canteenId,
     menu_date,
     meal_type,
     total_amount: totalAmount,
     status: needsApproval ? 'pending_approval' : 'confirmed',
     cancel_fee: 0,
     is_cancelled: 0,
+    is_extra: isExtra ? 1 : 0,
     cancelled_at: null,
     approved_by: null,
     approved_at: null,
@@ -992,11 +1043,16 @@ app.post('/api/orders/:id/substitute', (req, res) => {
 
 app.post('/api/supplement-orders', (req, res) => {
   const db = readDB();
-  const { original_order_id, employee_id, menu_date, meal_type, items, reason, is_extra } = req.body;
+  const { original_order_id, employee_id, menu_date, meal_type, canteen_id, items, reason, is_extra } = req.body;
   
   const employee = db.employees.find(e => e.id === employee_id);
   if (!employee) {
     return res.status(400).json({ error: '员工不存在' });
+  }
+  
+  const canteenId = parseInt(canteen_id) || items[0]?.canteen_id;
+  if (!canteenId) {
+    return res.status(400).json({ error: '请选择食堂' });
   }
   
   if (!items || items.length === 0) {
@@ -1012,15 +1068,22 @@ app.post('/api/supplement-orders', (req, res) => {
     if (!dailyMenu) {
       return res.status(400).json({ error: '餐品不存在' });
     }
-    if (dailyMenu.stock < item.quantity) {
-      return res.status(400).json({ error: `${dailyMenu.menu_name}库存不足` });
-    }
     const menu = db.menus.find(m => m.id === dailyMenu.menu_id);
+    if (!menu) {
+      return res.status(400).json({ error: '餐品数据异常' });
+    }
+    if (dailyMenu.canteen_id !== canteenId) {
+      return res.status(400).json({ error: `${menu.name}不属于当前所选食堂` });
+    }
+    if (dailyMenu.stock < item.quantity) {
+      return res.status(400).json({ error: `${menu.name}库存不足` });
+    }
     const subtotal = menu.price * item.quantity;
     totalAmount += subtotal;
     orderItems.push({
       daily_menu_id: dailyMenu.id,
       menu_id: dailyMenu.menu_id,
+      canteen_id: canteenId,
       menu_name: menu.name,
       price: menu.price,
       quantity: item.quantity,
@@ -1041,7 +1104,7 @@ app.post('/api/supplement-orders', (req, res) => {
     order_no: orderNo,
     employee_id,
     department_id: employee.department_id,
-    canteen_id: items[0]?.canteen_id || 1,
+    canteen_id: canteenId,
     menu_date,
     meal_type,
     total_amount: totalAmount,
