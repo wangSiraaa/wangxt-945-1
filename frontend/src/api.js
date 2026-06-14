@@ -47,6 +47,29 @@ export const approvalApi = {
 
 export const prepApi = {
   list: (date, mealType) => api.get('/prep-list', { params: { date, meal_type: mealType } }),
+  diff: (params) => api.get('/prep-diff', { params }),
+  addDiff: (data) => api.post('/prep-diff', data),
+};
+
+export const canteenWindowApi = {
+  list: (canteenId) => api.get('/canteen-windows', { params: { canteen_id: canteenId } }),
+};
+
+export const deliveryFloorApi = {
+  list: (canteenId) => api.get('/delivery-floors', { params: { canteen_id: canteenId } }),
+};
+
+export const menuIngredientApi = {
+  list: (params) => api.get('/menu-ingredients', { params }),
+};
+
+export const orderChangeLogApi = {
+  list: (params) => api.get('/order-change-logs', { params }),
+};
+
+export const financeLedgerApi = {
+  list: (params) => api.get('/finance-ledger', { params }),
+  recalculate: (data) => api.post('/finance-ledger/recalculate', data),
 };
 
 export const budgetApi = {

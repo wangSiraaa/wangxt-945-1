@@ -350,7 +350,7 @@
       "menu_date": "2026-06-12",
       "menu_id": 1,
       "meal_type": "breakfast",
-      "stock": 100,
+      "stock": 99,
       "predict_qty": 80,
       "created_at": "2026-06-11T18:32:15.286Z"
     },
@@ -370,7 +370,7 @@
       "menu_date": "2026-06-12",
       "menu_id": 2,
       "meal_type": "lunch",
-      "stock": 100,
+      "stock": 99,
       "predict_qty": 85,
       "created_at": "2026-06-11T18:32:15.286Z"
     },
@@ -1707,6 +1707,26 @@
       "reject_reason": null,
       "created_at": "2026-06-14T04:44:33.703Z",
       "updated_at": "2026-06-14T04:44:33.703Z"
+    },
+    {
+      "id": 22,
+      "order_no": "ORD202606141414318609",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 1,
+      "menu_date": "2025-07-16",
+      "meal_type": "lunch",
+      "total_amount": 53,
+      "status": "confirmed",
+      "cancel_fee": 0,
+      "is_cancelled": 0,
+      "is_extra": 1,
+      "cancelled_at": null,
+      "approved_by": null,
+      "approved_at": null,
+      "reject_reason": null,
+      "created_at": "2026-06-14T06:14:31.324Z",
+      "updated_at": "2026-06-14T06:14:31.324Z"
     }
   ],
   "order_items": [
@@ -2027,6 +2047,30 @@
       "quantity": 2,
       "subtotal": 56,
       "created_at": "2026-06-14T04:44:33.703Z"
+    },
+    {
+      "id": 26,
+      "order_id": 22,
+      "daily_menu_id": 1,
+      "menu_id": 1,
+      "canteen_id": 1,
+      "menu_name": "红烧排骨套餐",
+      "price": 28,
+      "quantity": 1,
+      "subtotal": 28,
+      "created_at": "2026-06-14T06:14:31.324Z"
+    },
+    {
+      "id": 27,
+      "order_id": 22,
+      "daily_menu_id": 3,
+      "menu_id": 2,
+      "canteen_id": 1,
+      "menu_name": "宫保鸡丁套餐",
+      "price": 25,
+      "quantity": 1,
+      "subtotal": 25,
+      "created_at": "2026-06-14T06:14:31.324Z"
     }
   ],
   "department_budgets": [
@@ -2159,6 +2203,16 @@
       "subsidy_used": 0,
       "created_at": "2026-06-11T18:32:15.296Z",
       "updated_at": "2026-06-12T01:20:42.113Z"
+    },
+    {
+      "id": 11,
+      "department_id": 1,
+      "budget_month": "2025-07",
+      "total_budget": 50000,
+      "used_amount": 53,
+      "reserved_amount": 0,
+      "created_at": "2026-06-14T06:14:31.324Z",
+      "updated_at": "2026-06-14T06:14:31.324Z"
     }
   ],
   "budget_freeze_records": [
@@ -2587,5 +2641,273 @@
       "remark": "未取餐",
       "created_at": "2026-06-12T06:00:00.000Z"
     }
-  ]
+  ],
+  "canteen_windows": [
+    {
+      "id": 1,
+      "canteen_id": 1,
+      "name": "A1窗口-荤菜",
+      "category": "荤菜套餐",
+      "is_active": 1
+    },
+    {
+      "id": 2,
+      "canteen_id": 1,
+      "name": "A2窗口-素菜",
+      "category": "素菜套餐",
+      "is_active": 1
+    },
+    {
+      "id": 3,
+      "canteen_id": 1,
+      "name": "A3窗口-面食",
+      "category": "面食",
+      "is_active": 1
+    },
+    {
+      "id": 4,
+      "canteen_id": 1,
+      "name": "A4窗口-粥品",
+      "category": "粥品套餐",
+      "is_active": 1
+    },
+    {
+      "id": 5,
+      "canteen_id": 1,
+      "name": "A5窗口-小吃",
+      "category": "小吃",
+      "is_active": 1
+    },
+    {
+      "id": 6,
+      "canteen_id": 2,
+      "name": "B1窗口-荤菜",
+      "category": "荤菜套餐",
+      "is_active": 1
+    },
+    {
+      "id": 7,
+      "canteen_id": 2,
+      "name": "B2窗口-面食小吃",
+      "category": "面食",
+      "is_active": 1
+    },
+    {
+      "id": 8,
+      "canteen_id": 3,
+      "name": "C1窗口-综合",
+      "category": "荤菜套餐",
+      "is_active": 1
+    }
+  ],
+  "delivery_floors": [
+    {
+      "id": 1,
+      "canteen_id": 1,
+      "building": "1号楼",
+      "floor": "1F",
+      "department_ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 2,
+      "canteen_id": 1,
+      "building": "1号楼",
+      "floor": "2F",
+      "department_ids": [
+        3
+      ]
+    },
+    {
+      "id": 3,
+      "canteen_id": 1,
+      "building": "1号楼",
+      "floor": "3F",
+      "department_ids": [
+        4,
+        5
+      ]
+    },
+    {
+      "id": 4,
+      "canteen_id": 2,
+      "building": "2号楼",
+      "floor": "1F",
+      "department_ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 5,
+      "canteen_id": 2,
+      "building": "2号楼",
+      "floor": "2F",
+      "department_ids": [
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": 6,
+      "canteen_id": 3,
+      "building": "分部大楼",
+      "floor": "1F",
+      "department_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "menu_ingredients": [
+    {
+      "id": 1,
+      "menu_id": 1,
+      "ingredient_name": "排骨",
+      "is_allergen": 0
+    },
+    {
+      "id": 2,
+      "menu_id": 2,
+      "ingredient_name": "花生",
+      "is_allergen": 1
+    },
+    {
+      "id": 3,
+      "menu_id": 3,
+      "ingredient_name": "肉丝",
+      "is_allergen": 0
+    },
+    {
+      "id": 4,
+      "menu_id": 6,
+      "ingredient_name": "鸡蛋",
+      "is_allergen": 1
+    },
+    {
+      "id": 5,
+      "menu_id": 8,
+      "ingredient_name": "花生",
+      "is_allergen": 1
+    },
+    {
+      "id": 6,
+      "menu_id": 10,
+      "ingredient_name": "鱼",
+      "is_allergen": 1
+    },
+    {
+      "id": 7,
+      "menu_id": 11,
+      "ingredient_name": "皮蛋",
+      "is_allergen": 0
+    },
+    {
+      "id": 8,
+      "menu_id": 1,
+      "ingredient_name": "酱油",
+      "is_allergen": 0
+    },
+    {
+      "id": 9,
+      "menu_id": 9,
+      "ingredient_name": "五花肉",
+      "is_allergen": 0
+    },
+    {
+      "id": 10,
+      "menu_id": 7,
+      "ingredient_name": "牛肉",
+      "is_allergen": 0
+    },
+    {
+      "id": 11,
+      "menu_id": 5,
+      "ingredient_name": "土豆",
+      "is_allergen": 0
+    },
+    {
+      "id": 12,
+      "menu_id": 4,
+      "ingredient_name": "豆腐",
+      "is_allergen": 0
+    }
+  ],
+  "order_change_logs": [
+    {
+      "id": 1,
+      "order_id": 22,
+      "order_no": "ORD202606141414318609",
+      "change_type": "create",
+      "before_status": "",
+      "after_status": "confirmed",
+      "before_items": null,
+      "after_items": null,
+      "amount_diff": 53,
+      "operator_id": 1,
+      "reason": "临时加餐",
+      "is_before_cutoff": true,
+      "created_at": "2026-06-14T06:14:31.324Z"
+    }
+  ],
+  "finance_ledger_entries": [
+    {
+      "id": 1,
+      "order_id": 22,
+      "order_no": "ORD202606141414318609",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 1,
+      "menu_date": "2025-07-16",
+      "meal_type": "lunch",
+      "entry_type": "subsidy",
+      "amount": 37.1,
+      "is_extra": 1,
+      "project_id": null,
+      "remark": "补贴入账",
+      "source_log_id": null,
+      "created_at": "2026-06-14T06:14:31.324Z"
+    },
+    {
+      "id": 2,
+      "order_id": 22,
+      "order_no": "ORD202606141414318609",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 1,
+      "menu_date": "2025-07-16",
+      "meal_type": "lunch",
+      "entry_type": "personal",
+      "amount": 15.9,
+      "is_extra": 1,
+      "project_id": null,
+      "remark": "个人自费入账",
+      "source_log_id": null,
+      "created_at": "2026-06-14T06:14:31.324Z"
+    },
+    {
+      "id": 3,
+      "order_id": 22,
+      "order_no": "ORD202606141414318609",
+      "employee_id": 1,
+      "department_id": 1,
+      "canteen_id": 1,
+      "menu_date": "2025-07-16",
+      "meal_type": "lunch",
+      "entry_type": "budget_use",
+      "amount": 53,
+      "is_extra": 1,
+      "project_id": null,
+      "remark": "部门预算占用",
+      "source_log_id": null,
+      "created_at": "2026-06-14T06:14:31.324Z"
+    }
+  ],
+  "prep_diff_records": []
 }

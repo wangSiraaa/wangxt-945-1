@@ -397,6 +397,26 @@ app.post('/api/orders', (req, res) => {
   
   db.orders.push(newOrder);
   db.order_items.push(...orderItemsWithId);
+
+  if (!needsApproval) {
+    writeOrderChangeLog(db, {
+      order_id: orderId, order_no: orderNo, change_type: 'create',
+      before_status: '', after_status: 'confirmed',
+      amount_diff: totalAmount, operator_id: employee_id,
+      reason: isExtra ? '临时加餐' : '常规订餐',
+      is_before_cutoff: isBeforeCutoff(menu_date, meal_type, isExtra)
+    });
+    writeFinanceLedgerForOrder(db, newOrder, 'create', null);
+  } else {
+    writeOrderChangeLog(db, {
+      order_id: orderId, order_no: orderNo, change_type: 'create_pending',
+      before_status: '', after_status: 'pending_approval',
+      amount_diff: totalAmount, operator_id: employee_id,
+      reason: '预算不足待审批',
+      is_before_cutoff: isBeforeCutoff(menu_date, meal_type, isExtra)
+    });
+  }
+
   writeDB(db);
   
   const result = {
@@ -423,6 +443,10 @@ app.post('/api/orders/:id/cancel', (req, res) => {
   if (order.is_cancelled === 1) {
     return res.status(400).json({ error: '订单已取消' });
   }
+
+  if (order.verified === 1) {
+    return res.status(400).json({ error: '已核销取餐的订单不能取消' });
+  }
   
   if (order.status === 'pending_approval') {
     order.is_cancelled = 1;
@@ -443,6 +467,14 @@ app.post('/api/orders/:id/cancel', (req, res) => {
       budget.updated_at = order.cancelled_at;
     }
     
+    writeOrderChangeLog(db, {
+      order_id: order.id, order_no: order.order_no, change_type: 'cancel_pending',
+      before_status: 'pending_approval', after_status: 'cancelled',
+      amount_diff: -order.total_amount, operator_id: order.employee_id,
+      reason: '取消待审批订单',
+      is_before_cutoff: 1
+    });
+
     writeDB(db);
     return res.json({ ...order, cancel_fee: 0 });
   }
@@ -471,6 +503,16 @@ app.post('/api/orders/:id/cancel', (req, res) => {
   order.cancel_fee = cancelFee;
   order.cancelled_at = new Date().toISOString();
   order.updated_at = order.cancelled_at;
+
+  writeOrderChangeLog(db, {
+    order_id: order.id, order_no: order.order_no, change_type: 'cancel',
+    before_status: 'confirmed', after_status: 'cancelled',
+    amount_diff: -order.total_amount + cancelFee, operator_id: order.employee_id,
+    reason: freeCancel ? '截单前免费取消' : '截单后扣费取消',
+    is_before_cutoff: freeCancel ? 1 : 0
+  });
+  order.cancel_fee = cancelFee;
+  writeFinanceLedgerForOrder(db, order, 'cancel', null);
   
   writeDB(db);
   
@@ -553,6 +595,15 @@ app.post('/api/approvals/:id/approve', (req, res) => {
   order.approved_by = approved_by || 1;
   order.approved_at = now;
   order.updated_at = now;
+
+  writeOrderChangeLog(db, {
+    order_id: order.id, order_no: order.order_no, change_type: 'approve',
+    before_status: 'pending_approval', after_status: 'confirmed',
+    amount_diff: order.total_amount, operator_id: approved_by || 1,
+    reason: '审批通过，占用备餐库存',
+    is_before_cutoff: isBeforeCutoff(order.menu_date, order.meal_type, order.is_extra === 1)
+  });
+  writeFinanceLedgerForOrder(db, order, 'approve', null);
   
   writeDB(db);
   
@@ -890,6 +941,14 @@ app.post('/api/orders/:id/verify', (req, res) => {
     verified_at: now,
     created_at: now
   });
+
+  writeOrderChangeLog(db, {
+    order_id: order.id, order_no: order.order_no, change_type: 'verify',
+    before_status: order.status, after_status: order.status + '_verified',
+    operator_id: verified_by || 1,
+    reason: '核销取餐',
+    is_before_cutoff: 0
+  });
   
   writeDB(db);
   res.json(order);
@@ -1036,6 +1095,20 @@ app.post('/api/orders/:id/substitute', (req, res) => {
   order.subsidy_amount = order.total_amount * (db.departments.find(d => d.id === order.department_id)?.subsidy_ratio || 0.7);
   order.personal_pay = order.total_amount - order.subsidy_amount;
   order.updated_at = new Date().toISOString();
+
+  writeOrderChangeLog(db, {
+    order_id: order.id, order_no: order.order_no, change_type: 'substitute',
+    before_status: order.status, after_status: order.status,
+    before_items: [{ menu_id: originalMenuId, name: '原菜品' }],
+    after_items: [{ menu_id: newDailyMenu.menu_id, name: newMenu ? newMenu.name : '' }],
+    amount_diff: priceDiff, operator_id: order.employee_id,
+    reason: reason || '菜品替换',
+    is_before_cutoff: isBeforeCutoff(order.menu_date, order.meal_type, order.is_extra === 1)
+  });
+  if (priceDiff !== 0) {
+    const ledgerOrder = { ...order, amount_diff: priceDiff };
+    writeFinanceLedgerForOrder(db, ledgerOrder, 'substitute', null);
+  }
   
   writeDB(db);
   res.json({ order, item: orderItem });
@@ -1183,6 +1256,16 @@ app.post('/api/supplement-orders', (req, res) => {
   
   db.orders.push(newOrder);
   db.order_items.push(...orderItemsWithId);
+
+  writeOrderChangeLog(db, {
+    order_id: orderId, order_no: orderNo, change_type: 'supplement',
+    before_status: '', after_status: 'confirmed',
+    amount_diff: totalAmount, operator_id: employee_id,
+    reason: is_extra ? '临时加餐' : (reason || '补改单'),
+    is_before_cutoff: is_extra ? 1 : 0
+  });
+  writeFinanceLedgerForOrder(db, newOrder, 'create', null);
+
   writeDB(db);
   
   res.status(201).json({
@@ -1406,6 +1489,396 @@ app.get('/api/dashboard/stats', (req, res) => {
     canteen_stats: canteenStats
   });
 });
+
+app.get('/api/canteen-windows', (req, res) => {
+  const db = readDB();
+  const { canteen_id } = req.query;
+  let windows = db.canteen_windows || [];
+  if (canteen_id) windows = windows.filter(w => w.canteen_id === parseInt(canteen_id));
+  res.json(windows);
+});
+
+app.get('/api/delivery-floors', (req, res) => {
+  const db = readDB();
+  const { canteen_id } = req.query;
+  let floors = db.delivery_floors || [];
+  if (canteen_id) floors = floors.filter(f => f.canteen_id === parseInt(canteen_id));
+  res.json(floors);
+});
+
+app.get('/api/menu-ingredients', (req, res) => {
+  const db = readDB();
+  const { menu_id, is_allergen } = req.query;
+  let items = db.menu_ingredients || [];
+  if (menu_id) items = items.filter(i => i.menu_id === parseInt(menu_id));
+  if (is_allergen !== undefined) items = items.filter(i => i.is_allergen === parseInt(is_allergen));
+  res.json(items);
+});
+
+app.get('/api/prep-diff', (req, res) => {
+  const db = readDB();
+  const { date, meal_type, canteen_id, group_by } = req.query;
+  if (!date) return res.status(400).json({ error: '请提供日期参数' });
+
+  let orders = db.orders.filter(o =>
+    (o.status === 'confirmed' || o.status === 'pending_approval') &&
+    o.is_cancelled === 0 &&
+    o.menu_date === date
+  );
+  if (meal_type) orders = orders.filter(o => o.meal_type === meal_type);
+  if (canteen_id) orders = orders.filter(o => o.canteen_id === parseInt(canteen_id));
+
+  const confirmedOrders = orders.filter(o => o.status === 'confirmed');
+  const pendingOrders = orders.filter(o => o.status === 'pending_approval');
+
+  const byWindow = {};
+  const byIngredient = {};
+  const byAllergen = {};
+  const byFloor = {};
+
+  const buildBreakdown = (orderList, tag) => {
+    for (const order of orderList) {
+      const items = db.order_items.filter(i => i.order_id === order.id);
+      for (const item of items) {
+        const menu = db.menus.find(m => m.id === item.menu_id);
+        const category = menu ? menu.category : '其他';
+        const windows = (db.canteen_windows || []).filter(w => w.canteen_id === order.canteen_id && w.category === category);
+        const winName = windows.length > 0 ? windows[0].name : `${db.canteens.find(c => c.id === order.canteen_id)?.name || '未知'}-${category}`;
+
+        if (!byWindow[winName]) byWindow[winName] = { window_name: winName, canteen_id: order.canteen_id, category, confirmed_qty: 0, pending_qty: 0, total_qty: 0, menu_items: {} };
+        byWindow[winName][`${tag}_qty`] += item.quantity;
+        byWindow[winName].total_qty += item.quantity;
+        if (!byWindow[winName].menu_items[item.menu_name]) byWindow[winName].menu_items[item.menu_name] = { confirmed_qty: 0, pending_qty: 0 };
+        byWindow[winName].menu_items[item.menu_name][`${tag}_qty`] += item.quantity;
+
+        const ingredients = (db.menu_ingredients || []).filter(mi => mi.menu_id === item.menu_id);
+        for (const ing of ingredients) {
+          if (!byIngredient[ing.ingredient_name]) byIngredient[ing.ingredient_name] = { ingredient_name: ing.ingredient_name, is_allergen: ing.is_allergen, confirmed_qty: 0, pending_qty: 0, total_qty: 0 };
+          byIngredient[ing.ingredient_name][`${tag}_qty`] += item.quantity;
+          byIngredient[ing.ingredient_name].total_qty += item.quantity;
+          if (ing.is_allergen === 1) {
+            if (!byAllergen[ing.ingredient_name]) byAllergen[ing.ingredient_name] = { allergen_name: ing.ingredient_name, confirmed_qty: 0, pending_qty: 0, total_qty: 0, affected_employees: new Set() };
+            byAllergen[ing.ingredient_name][`${tag}_qty`] += item.quantity;
+            byAllergen[ing.ingredient_name].total_qty += item.quantity;
+            const emp = db.employees.find(e => e.id === order.employee_id);
+            if (emp && emp.allergens && emp.allergens.includes(ing.ingredient_name)) {
+              byAllergen[ing.ingredient_name].affected_employees.add(`${emp.name}(${emp.employee_no})`);
+            }
+          }
+        }
+
+        const floors = (db.delivery_floors || []).filter(f => f.canteen_id === order.canteen_id && f.department_ids && f.department_ids.includes(order.department_id));
+        for (const fl of floors) {
+          const flKey = `${fl.building}-${fl.floor}`;
+          if (!byFloor[flKey]) byFloor[flKey] = { building: fl.building, floor: fl.floor, canteen_id: order.canteen_id, confirmed_qty: 0, pending_qty: 0, total_qty: 0, departments: new Set() };
+          byFloor[flKey][`${tag}_qty`] += item.quantity;
+          byFloor[flKey].total_qty += item.quantity;
+          const dept = db.departments.find(d => d.id === order.department_id);
+          if (dept) byFloor[flKey].departments.add(dept.name);
+        }
+      }
+    }
+  };
+
+  buildBreakdown(confirmedOrders, 'confirmed');
+  buildBreakdown(pendingOrders, 'pending');
+
+  const formatSet = (obj) => {
+    return Object.values(obj).map(v => {
+      const cloned = { ...v };
+      if (cloned.affected_employees) cloned.affected_employees = [...cloned.affected_employees];
+      if (cloned.departments) cloned.departments = [...cloned.departments];
+      if (cloned.menu_items) cloned.menu_items = { ...cloned.menu_items };
+      return cloned;
+    });
+  };
+
+  const diffs = (db.prep_diff_records || []).filter(d => d.menu_date === date && (!meal_type || d.meal_type === meal_type));
+
+  res.json({
+    by_window: formatSet(byWindow),
+    by_ingredient: formatSet(byIngredient),
+    by_allergen: formatSet(byAllergen),
+    by_floor: formatSet(byFloor),
+    diff_records: diffs,
+    summary: {
+      confirmed_orders: confirmedOrders.length,
+      pending_orders: pendingOrders.length,
+      total_orders: orders.length
+    }
+  });
+});
+
+app.post('/api/prep-diff', (req, res) => {
+  const db = readDB();
+  const { menu_date, meal_type, canteen_id, menu_id, menu_name, diff_quantity, diff_type, reason } = req.body;
+  const now = new Date().toISOString();
+  const recordId = (db.prep_diff_records || []).length + 1;
+  if (!db.prep_diff_records) db.prep_diff_records = [];
+  const record = {
+    id: recordId,
+    menu_date,
+    meal_type: meal_type || 'lunch',
+    canteen_id: canteen_id || 1,
+    menu_id,
+    menu_name,
+    diff_quantity: parseInt(diff_quantity),
+    diff_type: diff_type || 'supplement',
+    reason: reason || '',
+    created_at: now
+  };
+  db.prep_diff_records.push(record);
+  writeDB(db);
+  res.status(201).json(record);
+});
+
+app.get('/api/order-change-logs', (req, res) => {
+  const db = readDB();
+  const { order_id, change_type, start_date, end_date } = req.query;
+  let logs = db.order_change_logs || [];
+  if (order_id) logs = logs.filter(l => l.order_id === parseInt(order_id));
+  if (change_type) logs = logs.filter(l => l.change_type === change_type);
+  if (start_date) logs = logs.filter(l => l.created_at >= start_date);
+  if (end_date) logs = logs.filter(l => l.created_at <= end_date + ' 23:59:59');
+  logs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const result = logs.map(l => {
+    const emp = db.employees.find(e => e.id === l.operator_id);
+    return { ...l, operator_name: emp ? emp.name : '' };
+  });
+  res.json(result);
+});
+
+app.get('/api/finance-ledger', (req, res) => {
+  const db = readDB();
+  const { department_id, entry_type, start_date, end_date, menu_date, order_id } = req.query;
+  let entries = db.finance_ledger_entries || [];
+  if (department_id) entries = entries.filter(e => e.department_id === parseInt(department_id));
+  if (entry_type) entries = entries.filter(e => e.entry_type === entry_type);
+  if (menu_date) entries = entries.filter(e => e.menu_date === menu_date);
+  if (order_id) entries = entries.filter(e => e.order_id === parseInt(order_id));
+  if (start_date) entries = entries.filter(e => e.menu_date >= start_date);
+  if (end_date) entries = entries.filter(e => e.menu_date <= end_date);
+
+  entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const typeSummary = {};
+  for (const e of entries) {
+    if (!typeSummary[e.entry_type]) typeSummary[e.entry_type] = { entry_type: e.entry_type, count: 0, total_amount: 0 };
+    typeSummary[e.entry_type].count++;
+    typeSummary[e.entry_type].total_amount += e.amount;
+  }
+
+  const deptSummary = {};
+  for (const e of entries) {
+    if (!deptSummary[e.department_id]) {
+      const dept = db.departments.find(d => d.id === e.department_id);
+      deptSummary[e.department_id] = { department_id: e.department_id, department_name: dept ? dept.name : '', total_amount: 0, by_type: {} };
+    }
+    deptSummary[e.department_id].total_amount += e.amount;
+    if (!deptSummary[e.department_id].by_type[e.entry_type]) deptSummary[e.department_id].by_type[e.entry_type] = 0;
+    deptSummary[e.department_id].by_type[e.entry_type] += e.amount;
+  }
+
+  res.json({
+    entries: entries.map(e => {
+      const emp = db.employees.find(em => em.id === e.employee_id);
+      const dept = db.departments.find(d => d.id === e.department_id);
+      return { ...e, employee_name: emp ? emp.name : '', department_name: dept ? dept.name : '' };
+    }),
+    type_summary: Object.values(typeSummary).map(s => ({ ...s, total_amount: +s.total_amount.toFixed(2) })),
+    department_summary: Object.values(deptSummary).map(s => ({
+      ...s, total_amount: +s.total_amount.toFixed(2),
+      by_type: Object.fromEntries(Object.entries(s.by_type).map(([k, v]) => [k, +v.toFixed(2)]))
+    })),
+    total_entries: entries.length
+  });
+});
+
+app.post('/api/finance-ledger/recalculate', (req, res) => {
+  const db = readDB();
+  const { department_id, start_date, end_date } = req.body;
+  if (!department_id || !start_date || !end_date) return res.status(400).json({ error: '请提供部门ID和日期范围' });
+
+  const orders = db.orders.filter(o =>
+    o.department_id === department_id &&
+    o.menu_date >= start_date &&
+    o.menu_date <= end_date
+  );
+
+  const oldEntries = db.finance_ledger_entries.filter(e =>
+    e.department_id === department_id &&
+    e.menu_date >= start_date &&
+    e.menu_date <= end_date
+  );
+
+  db.finance_ledger_entries = db.finance_ledger_entries.filter(e =>
+    !(e.department_id === department_id && e.menu_date >= start_date && e.menu_date <= end_date)
+  );
+
+  for (const order of orders) {
+    if (order.is_cancelled === 0 && order.status === 'confirmed') {
+      writeFinanceLedgerForOrder(db, order, 'create', null);
+    } else if (order.is_cancelled === 1) {
+      writeFinanceLedgerForOrder(db, order, 'cancel', null);
+    }
+  }
+
+  writeDB(db);
+
+  res.json({
+    recalculated_orders: orders.length,
+    removed_entries: oldEntries.length,
+    new_entries: db.finance_ledger_entries.filter(e =>
+      e.department_id === department_id && e.menu_date >= start_date && e.menu_date <= end_date
+    ).length
+  });
+});
+
+function writeOrderChangeLog(db, params) {
+  const logId = db.order_change_logs.length + 1;
+  db.order_change_logs.push({
+    id: logId,
+    order_id: params.order_id,
+    order_no: params.order_no,
+    change_type: params.change_type,
+    before_status: params.before_status || '',
+    after_status: params.after_status || '',
+    before_items: params.before_items ? JSON.stringify(params.before_items) : null,
+    after_items: params.after_items ? JSON.stringify(params.after_items) : null,
+    amount_diff: params.amount_diff || 0,
+    operator_id: params.operator_id || null,
+    reason: params.reason || '',
+    is_before_cutoff: params.is_before_cutoff !== undefined ? params.is_before_cutoff : 1,
+    created_at: new Date().toISOString()
+  });
+}
+
+function writeFinanceLedgerEntry(db, params) {
+  const entryId = db.finance_ledger_entries.length + 1;
+  db.finance_ledger_entries.push({
+    id: entryId,
+    order_id: params.order_id,
+    order_no: params.order_no,
+    employee_id: params.employee_id,
+    department_id: params.department_id,
+    canteen_id: params.canteen_id,
+    menu_date: params.menu_date,
+    meal_type: params.meal_type,
+    entry_type: params.entry_type,
+    amount: params.amount,
+    is_extra: params.is_extra || 0,
+    project_id: params.project_id || null,
+    remark: params.remark || '',
+    source_log_id: params.source_log_id || null,
+    created_at: new Date().toISOString()
+  });
+}
+
+function writeFinanceLedgerForOrder(db, order, changeType, sourceLogId) {
+  const dept = db.departments.find(d => d.id === order.department_id);
+  const subsidyRatio = dept ? dept.subsidy_ratio : 0.7;
+  const baseNo = order.order_no;
+  const baseDate = order.menu_date;
+  const baseMeal = order.meal_type;
+  const baseCanteen = order.canteen_id;
+  const baseEmp = order.employee_id;
+  const baseDept = order.department_id;
+
+  if (changeType === 'create' || changeType === 'approve') {
+    writeFinanceLedgerEntry(db, {
+      order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+      department_id: baseDept, canteen_id: baseCanteen,
+      menu_date: baseDate, meal_type: baseMeal,
+      entry_type: 'subsidy', amount: +(order.total_amount * subsidyRatio).toFixed(2),
+      is_extra: order.is_extra, project_id: null, remark: '补贴入账',
+      source_log_id: sourceLogId
+    });
+    writeFinanceLedgerEntry(db, {
+      order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+      department_id: baseDept, canteen_id: baseCanteen,
+      menu_date: baseDate, meal_type: baseMeal,
+      entry_type: 'personal', amount: +(order.total_amount * (1 - subsidyRatio)).toFixed(2),
+      is_extra: order.is_extra, project_id: null, remark: '个人自费入账',
+      source_log_id: sourceLogId
+    });
+    writeFinanceLedgerEntry(db, {
+      order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+      department_id: baseDept, canteen_id: baseCanteen,
+      menu_date: baseDate, meal_type: baseMeal,
+      entry_type: 'budget_use', amount: +order.total_amount.toFixed(2),
+      is_extra: order.is_extra, project_id: null, remark: '部门预算占用',
+      source_log_id: sourceLogId
+    });
+    if (order.share_dept_ids && order.share_dept_ids.length > 0) {
+      const sharePerDept = +(order.total_amount / (order.share_dept_ids.length + 1)).toFixed(2);
+      for (const sdid of order.share_dept_ids) {
+        writeFinanceLedgerEntry(db, {
+          order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+          department_id: sdid, canteen_id: baseCanteen,
+          menu_date: baseDate, meal_type: baseMeal,
+          entry_type: 'project_share', amount: sharePerDept,
+          is_extra: order.is_extra, project_id: null, remark: '项目分摊入账',
+          source_log_id: sourceLogId
+        });
+      }
+    }
+  } else if (changeType === 'cancel') {
+    writeFinanceLedgerEntry(db, {
+      order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+      department_id: baseDept, canteen_id: baseCanteen,
+      menu_date: baseDate, meal_type: baseMeal,
+      entry_type: 'subsidy_reverse', amount: +(-order.total_amount * subsidyRatio).toFixed(2),
+      is_extra: order.is_extra, project_id: null, remark: '补贴冲回',
+      source_log_id: sourceLogId
+    });
+    writeFinanceLedgerEntry(db, {
+      order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+      department_id: baseDept, canteen_id: baseCanteen,
+      menu_date: baseDate, meal_type: baseMeal,
+      entry_type: 'personal_reverse', amount: +(-order.total_amount * (1 - subsidyRatio)).toFixed(2),
+      is_extra: order.is_extra, project_id: null, remark: '个人自费冲回',
+      source_log_id: sourceLogId
+    });
+    writeFinanceLedgerEntry(db, {
+      order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+      department_id: baseDept, canteen_id: baseCanteen,
+      menu_date: baseDate, meal_type: baseMeal,
+      entry_type: 'budget_release', amount: +order.total_amount.toFixed(2),
+      is_extra: order.is_extra, project_id: null, remark: '部门预算释放',
+      source_log_id: sourceLogId
+    });
+    if (order.cancel_fee > 0) {
+      writeFinanceLedgerEntry(db, {
+        order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+        department_id: baseDept, canteen_id: baseCanteen,
+        menu_date: baseDate, meal_type: baseMeal,
+        entry_type: 'overtime_fee', amount: +order.cancel_fee.toFixed(2),
+        is_extra: order.is_extra, project_id: null, remark: '超时取消费',
+        source_log_id: sourceLogId
+      });
+    }
+  } else if (changeType === 'substitute') {
+    if (order.amount_diff && order.amount_diff !== 0) {
+      writeFinanceLedgerEntry(db, {
+        order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+        department_id: baseDept, canteen_id: baseCanteen,
+        menu_date: baseDate, meal_type: baseMeal,
+        entry_type: 'subsidy_adjust', amount: +(order.amount_diff * subsidyRatio).toFixed(2),
+        is_extra: order.is_extra, project_id: null, remark: '换菜补贴调整',
+        source_log_id: sourceLogId
+      });
+      writeFinanceLedgerEntry(db, {
+        order_id: order.id, order_no: baseNo, employee_id: baseEmp,
+        department_id: baseDept, canteen_id: baseCanteen,
+        menu_date: baseDate, meal_type: baseMeal,
+        entry_type: 'personal_adjust', amount: +(order.amount_diff * (1 - subsidyRatio)).toFixed(2),
+        is_extra: order.is_extra, project_id: null, remark: '换菜自费调整',
+        source_log_id: sourceLogId
+      });
+    }
+  }
+}
 
 app.listen(PORT, () => {
   console.log(`团餐订餐结算系统后端服务运行在端口 ${PORT}`);

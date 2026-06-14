@@ -23,6 +23,7 @@ import SettlementPage from './pages/SettlementPage';
 import BudgetPage from './pages/BudgetPage';
 import CanteenPage from './pages/CanteenPage';
 import FinancePage from './pages/FinancePage';
+import FinanceTracePage from './pages/FinanceTracePage';
 
 const menuItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '工作台' },
@@ -33,6 +34,7 @@ const menuItems = [
   { key: '/canteen', icon: <CheckCircleOutlined />, label: '餐厅管理' },
   { key: '/settlement', icon: <AccountBookOutlined />, label: '部门结算' },
   { key: '/finance', icon: <DiffOutlined />, label: '财务对账' },
+  { key: '/finance-trace', icon: <AccountBookOutlined />, label: '财务追溯' },
   { key: '/budget', icon: <WalletOutlined />, label: '预算监控' },
 ];
 
@@ -65,6 +67,7 @@ export default function App() {
           <Route path="/canteen" element={<CanteenPage />} />
           <Route path="/settlement" element={<SettlementPage />} />
           <Route path="/finance" element={<FinancePage />} />
+          <Route path="/finance-trace" element={<FinanceTracePage />} />
           <Route path="/budget" element={<BudgetPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
